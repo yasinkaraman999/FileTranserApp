@@ -1,0 +1,58 @@
+@model FileTransferApp.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Giriş Yap</h2>
+                <p class="text-muted">Hesabınıza giriş yaparak dosyalarınızı yönetin.</p>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-controller="Account" asp-action="Login" method="post">
+                        <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                        
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                            <label asp-for="Email"></label>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Password" class="form-control" placeholder="Şifre" />
+                            <label asp-for="Password"></label>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="RememberMe" class="form-check-input" />
+                            <label asp-for="RememberMe" class="form-check-label"></label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yap
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="mb-0">
+                    Hesabınız yok mu? 
+                    <a asp-action="Register" class="text-primary text-decoration-none">Kayıt Ol</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

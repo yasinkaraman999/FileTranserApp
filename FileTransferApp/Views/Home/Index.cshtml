@@ -1,0 +1,115 @@
+@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3">Dosyalarınızı Güvenle Paylaşın</h1>
+            <p class="lead text-muted">2GB'a kadar dosyalarınızı ücretsiz olarak paylaşın.</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-controller="Files" asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                        <div class="upload-zone mb-4" id="dropZone">
+                            <input type="file" id="file" name="file" class="d-none" required />
+                            <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                            <h5 class="mb-3">Dosya Seç veya Sürükle Bırak</h5>
+                            <button type="button" class="btn btn-primary px-4" onclick="document.getElementById('file').click()">
+                                Dosya Seç
+                            </button>
+                            <p class="selected-file text-muted mt-3 mb-0" style="display: none;"></p>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Alıcı E-posta <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" name="recipientEmail" placeholder="ornek@mail.com" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Sizin E-postanız <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" name="senderEmail" placeholder="ornek@mail.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Mesaj (İsteğe bağlı)</label>
+                                <input type="text" class="form-control" name="message" placeholder="Dosya hakkında not ekleyin...">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Şifre (İsteğe bağlı)</label>
+                                <input type="password" class="form-control" name="password" placeholder="Dosya şifresi">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Son Kullanma Tarihi (İsteğe bağlı)</label>
+                                <input type="datetime-local" class="form-control" name="expiryDate" 
+                                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                                       value="@DateTime.Now.AddDays(5).ToString("yyyy-MM-ddTHH:mm")">
+                                <small class="text-muted">Belirtilmezse 5 gün sonra sona erer</small>
+                            </div>
+                        </div>
+
+                        <div class="progress mb-3" style="display: none;">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="upload-status text-center mb-3" style="display: none;">
+                            <span class="percentage">0%</span> - <span class="status">Yükleniyor...</span>
+                        </div>
+<div class="alert alert-info mt-4">
+                            <div class="d-flex">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <div>
+                                    <h6 class="alert-heading">Dosya Yükleme Kuralları</h6>
+                                    <ul class="mb-0 ps-3">
+                                        <li>Maksimum dosya boyutu: 100 MB</li>
+                                        <li>İzin verilen dosya türleri: .jpg, .png, .pdf, .doc, .docx, .xls, .xlsx, .zip, .rar</li>
+                                        <li>Şifre ve son kullanma tarihi isteğe bağlıdır</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                       
+                            <button type="submit" class="btn btn-primary px-4 w-100">
+                                <i class="bi bi-arrow-right me-2"></i>Gönder
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-5 g-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-shield-check text-primary mb-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title">Güvenli Paylaşım</h5>
+                    <p class="card-text text-muted">Dosyalarınız şifreleme ile korunur ve güvenle saklanır.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-clock-history text-primary mb-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title">Süreli Erişim</h5>
+                    <p class="card-text text-muted">Dosyalarınıza erişim süresini siz belirleyin.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-lightning-charge text-primary mb-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title">Hızlı Transfer</h5>
+                    <p class="card-text text-muted">Yüksek hızlı sunucularla hızlı dosya transferi.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ 

@@ -1,0 +1,257 @@
+@model IEnumerable<FileTransferApp.Models.FileResponseModel>
+
+@{
+    ViewData["Title"] = "Dosyalarım";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-folder me-2"></i>Dosyalarım
+        </h1>
+        <a href="/" class="btn btn-primary">
+            <i class="bi bi-cloud-upload me-2"></i>Yeni Dosya Yükle
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state text-center py-5">
+            <div class="empty-state-icon mb-4">
+                <i class="bi bi-folder2-open display-1 text-muted"></i>
+            </div>
+            <h4>Henüz Dosya Yok</h4>
+            <p class="text-muted mb-4">Dosya yüklemek için "Yeni Dosya Yükle" butonuna tıklayın.</p>
+            <a asp-action="Upload" class="btn btn-primary btn-lg">
+                <i class="bi bi-cloud-upload me-2"></i>Dosya Yükle
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">Dosya Adı</th>
+                            <th>Boyut</th>
+                            <th>Yüklenme Tarihi</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var file in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @{
+                                            var iconClass = file.ContentType switch
+                                            {
+                                                var x when x.Contains("image") => "bi-file-image",
+                                                var x when x.Contains("pdf") => "bi-file-pdf",
+                                                var x when x.Contains("word") => "bi-file-word",
+                                                var x when x.Contains("excel") => "bi-file-excel",
+                                                var x when x.Contains("zip") || x.Contains("rar") => "bi-file-zip",
+                                                _ => "bi-file-earmark"
+                                            };
+                                        }
+                                        <i class="bi @iconClass me-2 text-muted"></i>
+                                        <div>
+                                            <div class="text-truncate" style="max-width: 300px;">@file.FileName</div>
+                                            <small class="text-muted">@file.ContentType</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted">@((file.FileSize / 1024.0 / 1024.0).ToString("F2")) MB</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted" data-bs-toggle="tooltip" title="@file.UploadDate.ToString("g")">
+                                        @file.UploadDate.ToString("d MMM yyyy")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (file.IsExpired)
+                                    {
+                                        <span class="badge bg-danger">Süresi Dolmuş</span>
+                                    }
+                                    else if (file.ExpiryDate.HasValue)
+                                    {
+                                        <span class="badge bg-warning text-dark" data-bs-toggle="tooltip" 
+                                              title="Son Kullanma: @file.ExpiryDate?.ToString("g")">
+                                            @{
+                                                var daysLeft = (file.ExpiryDate.Value - DateTime.Now).Days;
+                                                @($"{daysLeft} gün kaldı")
+                                            }
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Aktif</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        @if (file.HasPassword)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="showPasswordModal('@file.Id')"
+                                                    data-bs-toggle="tooltip" title="Şifreli İndir">
+                                                <i class="bi bi-lock"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="Download" asp-route-id="@file.Id" 
+                                               class="btn btn-sm btn-outline-primary"
+                                               data-bs-toggle="tooltip" title="İndir">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        }
+                                        <button type="button" class="btn btn-sm btn-outline-info copy-link"
+                                                data-url="@Url.Action("download-temp", "Files", new { id = file.Id }, Context.Request.Scheme)"
+                                                data-bs-toggle="tooltip" title="Bağlantıyı Kopyala">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                onclick="confirmDelete('@file.Id')"
+                                                data-bs-toggle="tooltip" title="Sil">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Şifre Modalı -->
+<div class="modal fade password-modal" id="passwordModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dosya Şifresi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="fileId" />
+                <div class="mb-3">
+                    <div class="password-input-group">
+                        <input type="password" class="form-control" id="password" placeholder="Şifreyi giriniz">
+                        <button type="button" class="password-toggle-btn" onclick="togglePassword()">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-error d-none"></div>
+                </div>
+                <div class="download-loading d-none">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary"></div>
+                        <p>Dosya indiriliyor...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="downloadWithPassword()">İndir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Silme Onay Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dosyayı Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu dosyayı silmek istediğinizden emin misiniz?</p>
+                <p class="text-danger mb-0">Bu işlem geri alınamaz.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form asp-action="Delete" method="post" class="d-inline">
+                    <input type="hidden" id="deleteFileId" name="id">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tooltips'leri aktifleştir
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Bağlantı kopyalama
+        document.querySelectorAll('.copy-link').forEach(button => {
+            button.addEventListener('click', function() {
+                const url = this.dataset.url;
+                navigator.clipboard.writeText(url).then(() => {
+                    const tooltip = bootstrap.Tooltip.getInstance(this);
+                    const originalTitle = this.getAttribute('data-bs-original-title');
+                    
+                    this.setAttribute('data-bs-original-title', 'Kopyalandı!');
+                    tooltip.show();
+                    
+                    setTimeout(() => {
+                        this.setAttribute('data-bs-original-title', originalTitle);
+                        tooltip.hide();
+                    }, 1500);
+                });
+            });
+        });
+
+        // Silme onayı
+        function confirmDelete(fileId) {
+            document.getElementById('deleteFileId').value = fileId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        // Sayfa yüklendiğinde Enter tuşu ile indirme
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        downloadWithPassword();
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+@functions {
+    string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        int order = 0;
+        double size = bytes;
+        
+        while (size >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            size /= 1024;
+        }
+
+        return $"{size:0.##} {sizes[order]}";
+    }
+} 

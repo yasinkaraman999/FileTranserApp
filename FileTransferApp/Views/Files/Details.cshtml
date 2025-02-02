@@ -1,0 +1,192 @@
+@using FileTransferApp.Models
+@model FileResponseModel
+
+@{
+    ViewData["Title"] = "Dosya Detayları";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-file-earmark me-2"></i>Dosya Detayları
+        </h1>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h5 class="card-title d-flex align-items-center">
+                        @{
+                            var iconClass = Model.ContentType switch
+                            {
+                                var x when x.Contains("image") => "bi-file-image",
+                                var x when x.Contains("pdf") => "bi-file-pdf",
+                                var x when x.Contains("word") => "bi-file-word",
+                                var x when x.Contains("excel") => "bi-file-excel",
+                                var x when x.Contains("zip") || x.Contains("rar") => "bi-file-zip",
+                                _ => "bi-file-earmark"
+                            };
+                        }
+                        <i class="bi @iconClass me-2 text-muted"></i>
+                        @Model.FileName
+                    </h5>
+                    <div class="mt-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted">Dosya Boyutu</p>
+                                <h6>@((Model.FileSize / 1024.0 / 1024.0).ToString("F2")) MB</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted">Dosya Türü</p>
+                                <h6>@Model.ContentType</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted">Yüklenme Tarihi</p>
+                                <h6>@Model.UploadDate.ToString("g")</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted">Son Kullanma Tarihi</p>
+                                <h6>
+                                    @if (Model.IsExpired)
+                                    {
+                                        <span class="badge bg-danger">Süresi Dolmuş</span>
+                                    }
+                                    else if (Model.ExpiryDate.HasValue)
+                                    {
+                                        var daysLeft = (Model.ExpiryDate.Value - DateTime.Now).Days;
+                                        <span class="badge bg-warning text-dark">@($"{daysLeft} gün kaldı")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Süresiz</span>
+                                    }
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 border-start">
+                    <div class="d-grid gap-2">
+                        @if (Model.HasPassword)
+                        {
+                            <button type="button" class="btn btn-primary" onclick="showPasswordModal('@Model.Id')">
+                                <i class="bi bi-lock me-2"></i>Şifreli İndir
+                            </button>
+                        }
+                        else
+                        {
+                            <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-primary">
+                                <i class="bi bi-download me-2"></i>İndir
+                            </a>
+                        }
+                        <button type="button" class="btn btn-outline-info copy-link"
+                                data-url="@Url.Action("download-temp", "Files", new { id = Model.Id }, Context.Request.Scheme)">
+                            <i class="bi bi-link-45deg me-2"></i>Bağlantıyı Kopyala
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" onclick="confirmDelete('@Model.Id')">
+                            <i class="bi bi-trash me-2"></i>Sil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Şifre Modalı -->
+<div class="modal fade password-modal" id="passwordModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dosya Şifresi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="fileId" />
+                <div class="mb-3">
+                    <div class="password-input-group">
+                        <input type="password" class="form-control" id="password" placeholder="Şifreyi giriniz">
+                        <button type="button" class="password-toggle-btn" onclick="togglePassword()">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-error d-none"></div>
+                </div>
+                <div class="download-loading d-none">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary"></div>
+                        <p>Dosya indiriliyor...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="downloadWithPassword()">İndir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Silme Onay Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dosyayı Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu dosyayı silmek istediğinizden emin misiniz?</p>
+                <p class="text-danger mb-0">Bu işlem geri alınamaz.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form asp-action="Delete" method="post" class="d-inline">
+                    <input type="hidden" id="deleteFileId" name="id">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tooltips'leri aktifleştir
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Bağlantı kopyalama
+        document.querySelectorAll('.copy-link').forEach(button => {
+            button.addEventListener('click', function() {
+                const url = this.dataset.url;
+                navigator.clipboard.writeText(url).then(() => {
+                    const tooltip = bootstrap.Tooltip.getInstance(this);
+                    const originalTitle = this.getAttribute('data-bs-original-title');
+                    
+                    this.setAttribute('data-bs-original-title', 'Kopyalandı!');
+                    tooltip.show();
+                    
+                    setTimeout(() => {
+                        this.setAttribute('data-bs-original-title', originalTitle);
+                        tooltip.hide();
+                    }, 1500);
+                });
+            });
+        });
+
+        // Silme onayı
+        function confirmDelete(fileId) {
+            document.getElementById('deleteFileId').value = fileId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+} 

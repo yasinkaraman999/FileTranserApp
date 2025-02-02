@@ -1,0 +1,63 @@
+@model FileTransferApp.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Kayıt Ol";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Kayıt Ol</h2>
+                <p class="text-muted">Hesap oluşturarak dosyalarınızı güvenle paylaşın.</p>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-controller="Account" asp-action="Register" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Name" class="form-control" placeholder="Ad Soyad" />
+                            <label asp-for="Name"></label>
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                            <label asp-for="Email"></label>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Password" class="form-control" placeholder="Şifre" />
+                            <label asp-for="Password"></label>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="ConfirmPassword" class="form-control" placeholder="Şifre Tekrar" />
+                            <label asp-for="ConfirmPassword"></label>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-person-plus me-2"></i>Kayıt Ol
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="mb-0">
+                    Zaten hesabınız var mı? 
+                    <a asp-action="Login" class="text-primary text-decoration-none">Giriş Yap</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

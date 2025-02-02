@@ -1,0 +1,140 @@
+### Cursor AI Rules: OpenFileTransfer Project
+
+## Project Overview
+OpenFileTransfer is a privacy-focused file-sharing application that users can run on their own servers. Similar to WeTransfer and Dropbox, the project is built using .NET Core, SignalR, and MySQL. On the first run, a setup wizard is launched through the `/install` URL, allowing users to choose between storing files on the local server or AWS S3. It offers features like file uploading, sharing, password protection, and real-time notifications. The project is open-source and security-focused.
+
+## Project Context
+This document defines the rules and guidelines that Cursor AI must follow when working on the OpenFileTransfer project.
+
+### Technical Structure
+- **Platform:** Web
+- **Framework:** .NET Core
+- **Core Dependencies:**
+  - SignalR (real-time communication)
+  - MySQL (database)
+  - AWS SDK (cloud storage integration)
+
+---
+
+## Code Production Rules
+
+### 1. Project Structure
+- **Directory and File Organization:**
+  - Maintain the existing project structure.
+  - Place components in appropriate directories.
+  - Follow file naming conventions.
+  - Preserve module boundaries.
+  - Keep related files together.
+
+### 2. Code Style
+- **Formatting Rules:**
+  - Use consistent indentation.
+  - Adhere to line length limits.
+  - Use appropriate spacing.
+  - Pay attention to bracket usage.
+  - Apply consistent naming conventions.
+  - Follow .NET Core and C# best practices.
+
+### 3. Component Rules
+- **When Creating Components:**
+  - Follow component composition patterns.
+  - Use proper prop (property) typing.
+  - Implement appropriate state management.
+  - Handle errors correctly.
+  - Apply event handling effectively.
+  - Follow lifecycle best practices.
+  - Optimize rendering performance.
+
+### 4. Type System (C#, Not TypeScript)
+- **Type Safety:**
+  - Use strict type checking.
+  - Define appropriate interfaces.
+  - Handle null/undefined states properly.
+  - Document complex types.
+  - Prefer specific types over `dynamic` or `object`.
+
+### 5. API Integration
+- **API Usage:**
+  - Follow RESTful principles.
+  - Handle errors appropriately.
+  - Ensure type safety.
+  - Manage authentication correctly.
+  - Validate API responses.
+  - Document API usage.
+  - Implement caching mechanisms.
+
+### 6. State Management
+- **Application State:**
+  - Use appropriate state management solutions (e.g., real-time state management with SignalR).
+  - Adhere to immutability principles.
+  - Manage side effects effectively.
+  - Optimize state updates.
+  - Document state structures.
+
+### 7. Testing Requirements
+- **Creating Tests:**
+  - Write comprehensive unit tests.
+  - Implement integration tests.
+  - Follow testing best practices.
+  - Use appropriate mocking techniques.
+  - Test error scenarios.
+  - Maintain test coverage.
+  - Document test cases.
+
+### 8. Security Rules
+- **Security Practices:**
+  - Validate all inputs.
+  - Sanitize data outputs.
+  - Manage authentication properly.
+  - Protect sensitive data.
+  - Adhere to OWASP guidelines.
+  - Configure CORS settings correctly.
+  - Use secure dependencies.
+
+### 9. Performance Rules
+- **Performance Optimization:**
+  - Optimize file upload and download processes.
+  - Optimize database queries.
+  - Use appropriate caching mechanisms.
+  - Prevent unnecessary re-renders.
+  - Follow performance best practices.
+
+### 10. Documentation
+- **Creating Documentation:**
+  - Write clear and concise documentation.
+  - Use XML comments (for C#).
+  - Provide usage examples.
+  - Explain complex logic.
+  - Document type information.
+  - Adhere to documentation standards.
+
+---
+
+## Best Practices
+
+### 1. Code Quality
+- Write self-documenting code.
+- Keep functions small and focused.
+- Follow the DRY (Don’t Repeat Yourself) principle.
+- Use meaningful names.
+- Handle errors effectively.
+- Write maintainable code.
+
+### 2. Performance
+- Optimize file operations.
+- Speed up database queries.
+- Use caching mechanisms.
+- Avoid unnecessary operations.
+- Follow performance best practices.
+
+### 3. Security
+- Validate user inputs.
+- Sanitize data outputs.
+- Manage authentication properly.
+- Encrypt sensitive data.
+- Follow security best practices.
+
+---
+
+## Conclusion
+These rules are designed to ensure Cursor AI produces consistent, secure, and high-performance code for the OpenFileTransfer project. The rules should be updated and customized according to the project’s evolving needs. This document should be saved as `.cursorrules` in the project root directory.
